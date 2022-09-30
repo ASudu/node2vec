@@ -13,7 +13,8 @@ import argparse
 import numpy as np
 import networkx as nx
 import node2vec
-from gensim.models import Word2Vec
+from gensim.models import Word2Vec, KeyedVectors
+
 
 def parse_args():
 	'''
@@ -83,11 +84,20 @@ def learn_embeddings(walks):
 	'''
 	Learn embeddings by optimizing the Skipgram objective using SGD.
 	'''
-	walks = [map(str, walk) for walk in walks]
-	model = Word2Vec(walks, size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers, iter=args.iter)
-	model.save_word2vec_format(args.output)
+	walks = [list(map(str, walk)) for walk in walks]
+	# model = Word2Vec(walks, vector_size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers, iter=args.iter)
+	model = Word2Vec(walks, vector_size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers)
+	print(np.shape(model.wv["2"]))
+	KeyedVectors.load_word2vec_format(args.output)
 	
 	return
+
+def visualise_embeddings(model):
+	# Retrieve node embeddings and corresponding subjects
+	node_ids = model.wv.index2word  # list of node IDs
+	node_embeddings = (model.wv.vectors)
+	# numpy.ndarray of size number of nodes times embeddings dimensionality
+	# node_targets = node_subjects[[int(node_id) for node_id in node_ids]]
 
 def main(args):
 	'''
