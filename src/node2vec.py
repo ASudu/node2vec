@@ -5,31 +5,56 @@ import random
 
 class Graph():
 	def __init__(self, nx_G, is_directed, p, q):
+		"""Initializer function for this class
+
+		Args:
+			nx_G (networkx): Networkx graph of the network
+			is_directed (bool): Flag variable to indicate if graph is directed or not
+			p (float): Return parameter - controls likelihood of immediately revisiting a node
+			q (float): In-Out paramter - differentiates between inward and outward nodes
+		"""
 		self.G = nx_G
 		self.is_directed = is_directed
 		self.p = p
 		self.q = q
 
 	def node2vec_walk(self, walk_length, start_node):
-		'''
-		Simulate a random walk starting from start node.
-		'''
+		"""Simulate a random walk starting from start node.
+
+		Args:
+			walk_length (int): Length of the walk we wish to simulate
+			start_node (networkx): The node from where we start the walk
+
+		Returns:
+			walk(List): Walk represented as a list of nodes traversed
+		"""
 		G = self.G
+
+		# self.alias_nodes and self.alias edges defined in preprocess_transition_probs function
 		alias_nodes = self.alias_nodes
 		alias_edges = self.alias_edges
 
+		# Initialize the walk with the start node
 		walk = [start_node]
 
 		while len(walk) < walk_length:
+			# current node indicated by the last element of the walk
 			cur = walk[-1]
+			# Get the neighbors of current node
 			cur_nbrs = sorted(G.neighbors(cur))
+			# If current node has atleast one neighbor
 			if len(cur_nbrs) > 0:
+				# If only one node has been traversed so far
 				if len(walk) == 1:
+					# We traverse the next node selected by alias sampling
 					walk.append(cur_nbrs[alias_draw(alias_nodes[cur][0], alias_nodes[cur][1])])
 				else:
+					# We get the previous node in the walk
 					prev = walk[-2]
+					# Find the next node to be traveresed using alias sampling
 					next = cur_nbrs[alias_draw(alias_edges[(prev, cur)][0], 
 						alias_edges[(prev, cur)][1])]
+					# Update the walk
 					walk.append(next)
 			else:
 				break
@@ -37,9 +62,15 @@ class Graph():
 		return walk
 
 	def simulate_walks(self, num_walks, walk_length):
-		'''
-		Repeatedly simulate random walks from each node.
-		'''
+		"""Repeatedly simulate random walks from each node.
+
+		Args:
+			num_walks (_type_): _description_
+			walk_length (_type_): _description_
+
+		Returns:
+			_type_: _description_
+		"""
 		G = self.G
 		walks = []
 		nodes = list(G.nodes())
