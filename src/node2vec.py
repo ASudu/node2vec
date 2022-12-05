@@ -4,7 +4,7 @@ import random
 
 
 class Graph():
-	def __init__(self, nx_G, is_directed, p, q):
+	def __init__(self, nx_G: nx, is_directed: bool, p: float, q: float) -> None:
 		"""Initializer function for this class
 
 		Args:
@@ -18,7 +18,7 @@ class Graph():
 		self.p = p
 		self.q = q
 
-	def node2vec_walk(self, walk_length, start_node):
+	def node2vec_walk(self, walk_length: int, start_node: nx) -> list:
 		"""Simulate a random walk starting from start node.
 
 		Args:
@@ -63,9 +63,10 @@ class Graph():
 
 	def simulate_walks(self, num_walks, walk_length):
 		"""Repeatedly simulate random walks from each node.
+		Wrapper function to get multiple node2vec walks.
 
 		Args:
-			num_walks (_type_): _description_
+			num_walks (int): _description_
 			walk_length (_type_): _description_
 
 		Returns:
@@ -73,20 +74,32 @@ class Graph():
 		"""
 		G = self.G
 		walks = []
+		# Get the nodes of the network
 		nodes = list(G.nodes())
 		print('Walk iteration:')
+
+		# Get the required number of walks
 		for walk_iter in range(num_walks):
 			print(str(walk_iter+1)  + '/' + str(num_walks))
+			# To randomize the picking of nodes
 			random.shuffle(nodes)
+			# Get node2vec walks with each node of the network as a start node
 			for node in nodes:
+				# Get the node2vec walk and append it to the list of walks
 				walks.append(self.node2vec_walk(walk_length=walk_length, start_node=node))
 
 		return walks
 
 	def get_alias_edge(self, src, dst):
-		'''
-		Get the alias edge setup lists for a given edge.
-		'''
+		"""Get the alias edge setup lists for a given edge.
+
+		Args:
+			src (_type_): _description_
+			dst (_type_): _description_
+
+		Returns:
+			_type_: _description_
+		"""
 		G = self.G
 		p = self.p
 		q = self.q
