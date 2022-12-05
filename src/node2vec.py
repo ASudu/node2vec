@@ -1,6 +1,7 @@
 import numpy as np
 import networkx as nx
 import random
+from typing import List
 
 
 class Graph():
@@ -18,7 +19,7 @@ class Graph():
 		self.p = p
 		self.q = q
 
-	def node2vec_walk(self, walk_length: int, start_node: nx) -> list:
+	def node2vec_walk(self, walk_length: int, start_node: nx) -> List:
 		"""Simulate a random walk starting from start node.
 
 		Args:
@@ -28,15 +29,13 @@ class Graph():
 		Returns:
 			walk(List): Walk represented as a list of nodes traversed
 		"""
+		# Initializations
 		G = self.G
+		alias_nodes = self.alias_nodes # self.alias_nodes defined in preprocess_transition_probs function
+		alias_edges = self.alias_edges # self.alias edges defined in preprocess_transition_probs function
+		walk = [start_node] # Initialize the walk with the start node
 
-		# self.alias_nodes and self.alias edges defined in preprocess_transition_probs function
-		alias_nodes = self.alias_nodes
-		alias_edges = self.alias_edges
-
-		# Initialize the walk with the start node
-		walk = [start_node]
-
+		# The walk
 		while len(walk) < walk_length:
 			# current node indicated by the last element of the walk
 			cur = walk[-1]
@@ -61,21 +60,22 @@ class Graph():
 
 		return walk
 
-	def simulate_walks(self, num_walks, walk_length):
+	def simulate_walks(self, num_walks: int, walk_length: int) -> List:
 		"""Repeatedly simulate random walks from each node.
 		Wrapper function to get multiple node2vec walks.
 
 		Args:
-			num_walks (int): _description_
-			walk_length (_type_): _description_
+			num_walks (int): Number of node2vec walks we wish to simulate
+			walk_length (int): Length of each node2vec walk
 
 		Returns:
-			_type_: _description_
+			walks(List): List containing num_walks node2vec walks
 		"""
+		# Initializations
 		G = self.G
 		walks = []
-		# Get the nodes of the network
-		nodes = list(G.nodes())
+		nodes = list(G.nodes()) # Get the nodes of the network
+		
 		print('Walk iteration:')
 
 		# Get the required number of walks
@@ -90,53 +90,73 @@ class Graph():
 
 		return walks
 
-	def get_alias_edge(self, src, dst):
-		"""Get the alias edge setup lists for a given edge.
+	def get_alias_edge(self, src: nx, dst: nx):
+		"""Get the normalized transition probability after traversing edge src-dst.
+		To use same notation as the paper:
+		src here denotes 't' in the paper
+		dst here denotes 'v' in the paper
+		Unnormalized transition probability = search bias * weight(edge to be traversed)
 
 		Args:
-			src (_type_): _description_
-			dst (_type_): _description_
+			src (nx): Source vertex of the edge (tail of edge if directed graphs)
+			dst (nx): Destination vertex of the edge (head of edge if directed graphs)
 
 		Returns:
 			_type_: _description_
 		"""
+		# Initializations
 		G = self.G
 		p = self.p
 		q = self.q
-
 		unnormalized_probs = []
+
+		# For each neighbor of the dst (v) (dst_nbr here denotes 'x' in the paper)
 		for dst_nbr in sorted(G.neighbors(dst)):
+			# If we are revisiting the src (t) (i.e., dtx = 0)
 			if dst_nbr == src:
+				# Search bias is 1/p
 				unnormalized_probs.append(G[dst][dst_nbr]['weight']/p)
+			# If dtx = 1
 			elif G.has_edge(dst_nbr, src):
+				# Search bias = 1
 				unnormalized_probs.append(G[dst][dst_nbr]['weight'])
+			# If dtx = 2
 			else:
+				# Search bias = 1/q
 				unnormalized_probs.append(G[dst][dst_nbr]['weight']/q)
+		
+		# Find the normalization constant to normalize this unnormalized transition probability
 		norm_const = sum(unnormalized_probs)
+		# Normalized probabilities obtained
 		normalized_probs =  [float(u_prob)/norm_const for u_prob in unnormalized_probs]
 
 		return alias_setup(normalized_probs)
 
 	def preprocess_transition_probs(self):
-		'''
-		Preprocessing of transition probabilities for guiding the random walks.
-		'''
+		"""Preprocessing of transition probabilities for guiding the random walks.
+		After this, as the walk goes on, based on the transitions, the probabilities will be recomputed.
+		"""
+		# Initializations
 		G = self.G
 		is_directed = self.is_directed
-
 		alias_nodes = {}
-		for node in G.nodes():
-			unnormalized_probs = [G[node][nbr]['weight'] for nbr in sorted(G.neighbors(node))]
-			norm_const = sum(unnormalized_probs)
-			normalized_probs =  [float(u_prob)/norm_const for u_prob in unnormalized_probs]
-			alias_nodes[node] = alias_setup(normalized_probs)
-
 		alias_edges = {}
 		triads = {}
 
+		for v in G.nodes():
+			# Unnormalized probability of traversing edge v-x = edge weight of edge v-x
+			unnormalized_probs = [G[v][nbr]['weight'] for nbr in sorted(G.neighbors(v))]
+			# Find the normalization constant
+			norm_const = sum(unnormalized_probs)
+			# Normalize the probabilities
+			normalized_probs =  [float(u_prob)/norm_const for u_prob in unnormalized_probs]
+			alias_nodes[v] = alias_setup(normalized_probs)
+
+		# For directed graphs
 		if is_directed:
 			for edge in G.edges():
 				alias_edges[edge] = self.get_alias_edge(edge[0], edge[1])
+		# For undirected graphs
 		else:
 			for edge in G.edges():
 				alias_edges[edge] = self.get_alias_edge(edge[0], edge[1])
@@ -149,11 +169,16 @@ class Graph():
 
 
 def alias_setup(probs):
-	'''
-	Compute utility lists for non-uniform sampling from discrete distributions.
+	"""Compute utility lists for non-uniform sampling from discrete distributions.
 	Refer to https://hips.seas.harvard.edu/blog/2013/03/03/the-alias-method-efficient-sampling-with-many-discrete-outcomes/
 	for details
-	'''
+
+	Args:
+		probs (_type_): _description_
+
+	Returns:
+		_type_: _description_
+	"""
 	K = len(probs)
 	q = np.zeros(K)
 	J = np.zeros(K, dtype=np.int)
@@ -181,9 +206,15 @@ def alias_setup(probs):
 	return J, q
 
 def alias_draw(J, q):
-	'''
-	Draw sample from a non-uniform discrete distribution using alias sampling.
-	'''
+	"""Draw sample from a non-uniform discrete distribution using alias sampling.
+
+	Args:
+		J (_type_): _description_
+		q (_type_): _description_
+
+	Returns:
+		_type_: _description_
+	"""
 	K = len(J)
 
 	kk = int(np.floor(np.random.rand()*K))
