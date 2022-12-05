@@ -1,11 +1,9 @@
 import numpy as np
 import networkx as nx
 import random
-from typing import List
-
 
 class Graph():
-	def __init__(self, nx_G: nx, is_directed: bool, p: float, q: float) -> None:
+	def __init__(self, nx_G, is_directed, p, q):
 		"""Initializer function for this class
 
 		Args:
@@ -19,7 +17,7 @@ class Graph():
 		self.p = p
 		self.q = q
 
-	def node2vec_walk(self, walk_length: int, start_node: nx) -> List:
+	def node2vec_walk(self, walk_length, start_node):
 		"""Simulate a random walk starting from start node.
 
 		Args:
@@ -60,7 +58,7 @@ class Graph():
 
 		return walk
 
-	def simulate_walks(self, num_walks: int, walk_length: int) -> List:
+	def simulate_walks(self, num_walks, walk_length):
 		"""Repeatedly simulate random walks from each node.
 		Wrapper function to get multiple node2vec walks.
 
@@ -90,7 +88,7 @@ class Graph():
 
 		return walks
 
-	def get_alias_edge(self, src: nx, dst: nx):
+	def get_alias_edge(self, src, dst):
 		"""Get the normalized transition probability after traversing edge src-dst.
 		To use same notation as the paper:
 		src here denotes 't' in the paper
@@ -141,7 +139,7 @@ class Graph():
 		is_directed = self.is_directed
 		alias_nodes = {}
 		alias_edges = {}
-		triads = {}
+		# triads = {}
 
 		for v in G.nodes():
 			# Unnormalized probability of traversing edge v-x = edge weight of edge v-x
@@ -174,7 +172,7 @@ def alias_setup(probs):
 	for details
 
 	Args:
-		probs (_type_): _description_
+		probs (List): List of normalized transition probabilities
 
 	Returns:
 		_type_: _description_
