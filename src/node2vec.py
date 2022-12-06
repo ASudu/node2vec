@@ -186,24 +186,28 @@ def alias_setup(probs):
 		_type_: _description_
 	"""
 	K = len(probs)
-	q = np.zeros(K)
+	q = np.zeros(K)	
 	J = np.zeros(K, dtype=np.int)
 
 	smaller = []
 	larger = []
 	for kk, prob in enumerate(probs):
-		q[kk] = K*prob
+		q[kk] = K*prob	# Multplying all probabilities by number of probabilities
 		if q[kk] < 1.0:
-			smaller.append(kk)
+			smaller.append(kk) 	# Probabilities lesser than 1/K in probs
 		else:
-			larger.append(kk)
+			larger.append(kk)	# Probabilities greater than or equal to 1/K in probs
 
 	while len(smaller) > 0 and len(larger) > 0:
-		small = smaller.pop()
-		large = larger.pop()
+		small = smaller.pop() 	# returns topmost index appended to the list
+		large = larger.pop()	
 
-		J[small] = large
-		q[large] = q[large] + q[small] - 1.0
+		J[small] = large		# Creating a list with a relation from small probability to large probability
+								# Is used in the case probability chosen during draw is 'small' and we need a larger one
+								# So we link the small index with its corresponding larger relation
+
+		q[large] = q[large] + q[small] - 1.0	# Modifying probabilities in array q
+
 		if q[large] < 1.0:
 			smaller.append(large)
 		else:
@@ -223,8 +227,8 @@ def alias_draw(J, q):
 	"""
 	K = len(J)
 
-	kk = int(np.floor(np.random.rand()*K))
-	if np.random.rand() < q[kk]:
+	kk = int(np.floor(np.random.rand()*K)) 	# Randomly choosing an index value
+	if np.random.rand() < q[kk]:			# If random value is lesser than probability stored in q
 		return kk
-	else:
+	else:									# If random value is greater/equal them use small-large relation J
 		return J[kk]
