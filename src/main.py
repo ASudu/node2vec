@@ -24,8 +24,8 @@ def parse_args():
 	walk-length: Length of walk per source node
 	num-walks: Number of walks per source node
 	window-size: Context size for optimization (default is 10)
-	iter: Number of epochs for SGD
-	workers: Number of parallel workers
+	iter: Number of epochs for SGD (default is 1)
+	workers: Number of parallel workers (for training parallelization - speed up training)
 	p: Return hyperparameter (default is 1)
 	q: InOut hyperparameter (default is 1)
 	weighted: Boolean specifying (un)weighted. Default is unweighted
@@ -55,7 +55,7 @@ def parse_args():
                     	help='Context size for optimization. Default is 10.')
 
 	parser.add_argument('--iter', default=1, type=int,
-                      help='Number of epochs in SGD')
+                      help='Number of epochs in SGD. Default is 1.')
 
 	parser.add_argument('--workers', type=int, default=8,
 	                    help='Number of parallel workers. Default is 8.')
@@ -103,15 +103,20 @@ def learn_embeddings(walks):
 	"""Learn embeddings by optimizing the Skipgram objective using SGD.
 
 	Args:
-		walks (_type_): _description_
+		walks (List): List of simulated node2vec walks
+
+	Returns:
+		model: Trained model ready for visualization
 	"""
+	# Convert list of lists to a list of strings
+	# by representing each walk as a string of nodes rather than a list of traveresed nodes
 	walks = [list(map(str, walk)) for walk in walks]
-	# model = Word2Vec(walks, vector_size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers, iter=args.iter)
-	model = Word2Vec(walks, vector_size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers)
-	print(np.shape(model.wv["2"]))
+	# Instantiate the word2vec model
+	model = Word2Vec(sentences=walks, vector_size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers, epochs=args.iter)
+	# Load the KeyedVectors of trained model
 	KeyedVectors.load_word2vec_format(args.output)
 	
-	return
+	return model
 
 def visualise_embeddings(model):
 	# Retrieve node embeddings and corresponding subjects
@@ -126,6 +131,7 @@ def main(args):
 	Args:
 		args (parse_args): Arguments for the embeddings as defined in parse_args function
 	"""
+	# Convert network data to a graph
 	nx_G = read_graph()
 	G = node2vec.Graph(nx_G, args.directed, args.p, args.q)
 	G.preprocess_transition_probs()
