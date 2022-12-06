@@ -17,9 +17,23 @@ from gensim.models import Word2Vec, KeyedVectors
 
 
 def parse_args():
-	'''
-	Parses the node2vec arguments.
-	'''
+	"""Parses the node2vec arguments:
+	input: Path of file containing data of input graph
+	output: Path of file to store learnt embeddings
+	dimensions: Dimensions of embedding space (default is 128)
+	walk-length: Length of walk per source node
+	num-walks: Number of walks per source node
+	window-size: Context size for optimization (default is 10)
+	iter: Number of epochs for SGD
+	workers: Number of parallel workers
+	p: Return hyperparameter (default is 1)
+	q: InOut hyperparameter (default is 1)
+	weighted: Boolean specifying (un)weighted. Default is unweighted
+	directed: Boolean specifying (un)directed. Default is undirected
+
+	Returns:
+		parser.parse_args: The arguments required to run node2vec
+	"""
 	parser = argparse.ArgumentParser(description="Run node2vec.")
 
 	parser.add_argument('--input', nargs='?', default='graph/karate.edgelist',
@@ -58,32 +72,39 @@ def parse_args():
 	parser.set_defaults(weighted=False)
 
 	parser.add_argument('--directed', dest='directed', action='store_true',
-	                    help='Graph is (un)directed. Default is undirected.')
+	                    help='c.')
 	parser.add_argument('--undirected', dest='undirected', action='store_false')
 	parser.set_defaults(directed=False)
 
 	return parser.parse_args()
 
 def read_graph():
-	'''
-	Reads the input network in networkx.
-	'''
-	if args.weighted:
+	"""Reads the input network in networkx.
+
+	Returns:
+		G: Networkx graph having information of the input network
+	"""
+	# By default create a directed graph (DiGraph) by reading the edge list
+	if args.weighted: # If graph is weighted
 		G = nx.read_edgelist(args.input, nodetype=int, data=(('weight',float),), create_using=nx.DiGraph())
-	else:
+	else: # If graph is unweighted
 		G = nx.read_edgelist(args.input, nodetype=int, create_using=nx.DiGraph())
+		# Assign edge weights to 1 (since unweighted)
 		for edge in G.edges():
 			G[edge[0]][edge[1]]['weight'] = 1
 
+	# If network is undirected, we convert G to undirected graph
 	if not args.directed:
 		G = G.to_undirected()
 
 	return G
 
 def learn_embeddings(walks):
-	'''
-	Learn embeddings by optimizing the Skipgram objective using SGD.
-	'''
+	"""Learn embeddings by optimizing the Skipgram objective using SGD.
+
+	Args:
+		walks (_type_): _description_
+	"""
 	walks = [list(map(str, walk)) for walk in walks]
 	# model = Word2Vec(walks, vector_size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers, iter=args.iter)
 	model = Word2Vec(walks, vector_size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers)
@@ -100,9 +121,11 @@ def visualise_embeddings(model):
 	# node_targets = node_subjects[[int(node_id) for node_id in node_ids]]
 
 def main(args):
-	'''
-	Pipeline for representational learning for all nodes in a graph.
-	'''
+	"""Pipeline for representational learning for all nodes in a graph.
+
+	Args:
+		args (parse_args): Arguments for the embeddings as defined in parse_args function
+	"""
 	nx_G = read_graph()
 	G = node2vec.Graph(nx_G, args.directed, args.p, args.q)
 	G.preprocess_transition_probs()

@@ -207,8 +207,8 @@ def alias_draw(J, q):
 	"""Draw sample from a non-uniform discrete distribution using alias sampling.
 
 	Args:
-		J (_type_): _description_
-		q (_type_): _description_
+		J (numpy array): _description_
+		q (numpy array): _description_
 
 	Returns:
 		_type_: _description_
