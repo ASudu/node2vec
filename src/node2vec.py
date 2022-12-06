@@ -4,7 +4,8 @@ import random
 
 class Graph():
 	def __init__(self, nx_G, is_directed, p, q):
-		"""Initializer function for this class
+		"""
+		Initializer function for this class
 
 		Args:
 			nx_G (networkx): Networkx graph of the network
@@ -18,7 +19,8 @@ class Graph():
 		self.q = q
 
 	def node2vec_walk(self, walk_length, start_node):
-		"""Simulate a random walk starting from start node.
+		"""
+		Simulate a random walk starting from start node.
 
 		Args:
 			walk_length (int): Length of the walk we wish to simulate
@@ -44,11 +46,12 @@ class Graph():
 				# If only one node has been traversed so far
 				if len(walk) == 1:
 					# We traverse the next node selected by alias sampling
-					walk.append(cur_nbrs[alias_draw(alias_nodes[cur][0], alias_nodes[cur][1])])
+					# We use first order random walk as there is no previous node as we are just starting
+					walk.append(cur_nbrs[alias_draw(alias_nodes[cur][0], alias_nodes[cur][1])]) 
 				else:
 					# We get the previous node in the walk
 					prev = walk[-2]
-					# Find the next node to be traveresed using alias sampling
+					# Find the next node to be traveresed using alias sampling via second order random walk
 					next = cur_nbrs[alias_draw(alias_edges[(prev, cur)][0], 
 						alias_edges[(prev, cur)][1])]
 					# Update the walk
@@ -114,11 +117,11 @@ class Graph():
 			if dst_nbr == src:
 				# Search bias is 1/p
 				unnormalized_probs.append(G[dst][dst_nbr]['weight']/p)
-			# If dtx = 1
+			# If dtx = 1 ,i.e., if v and t share a common node 
 			elif G.has_edge(dst_nbr, src):
 				# Search bias = 1
 				unnormalized_probs.append(G[dst][dst_nbr]['weight'])
-			# If dtx = 2
+			# If dtx = 2 ,i.e., the node only has common edge with v
 			else:
 				# Search bias = 1/q
 				unnormalized_probs.append(G[dst][dst_nbr]['weight']/q)
@@ -128,10 +131,12 @@ class Graph():
 		# Normalized probabilities obtained
 		normalized_probs =  [float(u_prob)/norm_const for u_prob in unnormalized_probs]
 
+		# Determining Alias probability distribution for edges
 		return alias_setup(normalized_probs)
 
 	def preprocess_transition_probs(self):
-		"""Preprocessing of transition probabilities for guiding the random walks.
+		"""
+		Preprocessing of transition probabilities for guiding the random walks.
 		After this, as the walk goes on, based on the transitions, the probabilities will be recomputed.
 		"""
 		# Initializations
@@ -141,6 +146,7 @@ class Graph():
 		alias_edges = {}
 		# triads = {}
 
+		# Generating alias distribution for first order random walk alias_node
 		for v in G.nodes():
 			# Unnormalized probability of traversing edge v-x = edge weight of edge v-x
 			unnormalized_probs = [G[v][nbr]['weight'] for nbr in sorted(G.neighbors(v))]
@@ -148,17 +154,19 @@ class Graph():
 			norm_const = sum(unnormalized_probs)
 			# Normalize the probabilities
 			normalized_probs =  [float(u_prob)/norm_const for u_prob in unnormalized_probs]
+			# Generating Alias probability distribution for the nodes
 			alias_nodes[v] = alias_setup(normalized_probs)
 
-		# For directed graphs
+		# Generating alias distribution for second order random walk alias_edges
+		# For directed graphs ,i.e., only one way edges (may be both ways if defined in graph)
 		if is_directed:
 			for edge in G.edges():
 				alias_edges[edge] = self.get_alias_edge(edge[0], edge[1])
-		# For undirected graphs
+		# For undirected graphs ,i.e., for dual connection between all edges
 		else:
 			for edge in G.edges():
-				alias_edges[edge] = self.get_alias_edge(edge[0], edge[1])
-				alias_edges[(edge[1], edge[0])] = self.get_alias_edge(edge[1], edge[0])
+				alias_edges[edge] = self.get_alias_edge(edge[0], edge[1]) 				# Between node 0 and node 1 in the edge
+				alias_edges[(edge[1], edge[0])] = self.get_alias_edge(edge[1], edge[0]) # Between node 1 and node 0 in the edge
 
 		self.alias_nodes = alias_nodes
 		self.alias_edges = alias_edges
