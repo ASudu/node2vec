@@ -186,8 +186,8 @@ def alias_setup(probs):
 
 	Returns:
 		[J,q]
-		J (np.array(dtype=int)):  Relation between smaller and larger probabilities
-		q (np.array()) : Probability list after modification by alias algorithm
+		J (numpy array(dtype=int)):  Relation between smaller and larger probabilities
+		q (numpy array(dtype=float)) : Probability list after modification by alias algorithm
 	"""
 	# Initializations
 	K = len(probs)
@@ -224,8 +224,8 @@ def alias_draw(J, q):
 	"""Draw sample from a non-uniform discrete distribution using alias sampling.
 
 	Args:
-		J (numpy array): _description_
-		q (numpy array): _description_
+		J (numpy array(dtype=int)):  Relation between smaller and larger probabilities
+		q (numpy array(dtype=float)) : Probability list after modification by alias algorithm
 
 	Returns:
 		_type_: _description_
