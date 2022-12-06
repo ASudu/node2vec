@@ -1,13 +1,19 @@
-'''
-Reference implementation of node2vec. 
+"""
+Project details:
+----------------
 
-Author: Aditya Grover
+Paper title:
+Node2vec: Scalable Feature Learning for Networks 
 
-For more details, refer to the paper:
-node2vec: Scalable Feature Learning for Networks
-Aditya Grover and Jure Leskovec 
-Knowledge Discovery and Data Mining (KDD), 2016
-'''
+Group members:
+A.Sudarshan (2019B4A70744P)
+Rahul Balike (2019A3PS0189P)
+Manpreet Singh Ahluwalia (2020A3PS0419P)
+
+Teaching Assistant:
+Sarthak Gupta (2019B4A70464P)
+"""
+
 
 import argparse
 import numpy as np
@@ -133,8 +139,11 @@ def main(args):
 	"""
 	# Convert network data to a graph
 	nx_G = read_graph()
+	# Call node2vec
 	G = node2vec.Graph(nx_G, args.directed, args.p, args.q)
+	# Compute transition probabilities
 	G.preprocess_transition_probs()
+	# Simulate node2vec walks
 	walks = G.simulate_walks(args.num_walks, args.walk_length)
 	learn_embeddings(walks)
 
