@@ -168,6 +168,8 @@ class Graph():
 				alias_edges[edge] = self.get_alias_edge(edge[0], edge[1]) 				# Between node 0 and node 1 in the edge
 				alias_edges[(edge[1], edge[0])] = self.get_alias_edge(edge[1], edge[0]) # Between node 1 and node 0 in the edge
 
+		# Alias_nodes are for 1st order random walk (required at the first step of the node2vec walk)
+		# Alias edges are for 2nd order random walk (required for further steps of the node2vec walk)
 		self.alias_nodes = alias_nodes
 		self.alias_edges = alias_edges
 
@@ -183,16 +185,19 @@ def alias_setup(probs):
 		probs (List): List of normalized transition probabilities
 
 	Returns:
-		_type_: _description_
+		[J,q]
+		J (numpy array(dtype=int)):  Relation between smaller and larger probabilities
+		q (numpy array(dtype=float)) : Probability list after modification by alias algorithm
 	"""
+	# Initializations
 	K = len(probs)
 	q = np.zeros(K)	
 	J = np.zeros(K, dtype=np.int)
-
 	smaller = []
 	larger = []
+	
 	for kk, prob in enumerate(probs):
-		q[kk] = K*prob	# Multplying all probabilities by number of probabilities
+		q[kk] = K*prob	# Multiplying all probabilities by number of probabilities
 		if q[kk] < 1.0:
 			smaller.append(kk) 	# Probabilities lesser than 1/K in probs
 		else:
@@ -219,15 +224,16 @@ def alias_draw(J, q):
 	"""Draw sample from a non-uniform discrete distribution using alias sampling.
 
 	Args:
-		J (numpy array): _description_
-		q (numpy array): _description_
+		J (numpy array(dtype=int)):  Relation between smaller and larger probabilities
+		q (numpy array(dtype=float)) : Probability list after modification by alias algorithm
 
 	Returns:
 		_type_: _description_
 	"""
+	# Initializations
 	K = len(J)
-
 	kk = int(np.floor(np.random.rand()*K)) 	# Randomly choosing an index value
+
 	if np.random.rand() < q[kk]:			# If random value is lesser than probability stored in q
 		return kk
 	else:									# If random value is greater/equal them use small-large relation J

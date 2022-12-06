@@ -1,19 +1,26 @@
-'''
-Reference implementation of node2vec. 
+"""
+Project details:
+----------------
 
-Author: Aditya Grover
+Paper title:
+Node2vec: Scalable Feature Learning for Networks 
 
-For more details, refer to the paper:
-node2vec: Scalable Feature Learning for Networks
-Aditya Grover and Jure Leskovec 
-Knowledge Discovery and Data Mining (KDD), 2016
-'''
+Group members:
+A.Sudarshan (2019B4A70744P)
+Rahul Balike (2019A3PS0189P)
+Manpreet Singh Ahluwalia (2020A3PS0419P)
+
+Teaching Assistant:
+Sarthak Gupta (2019B4A70464P)
+"""
+
 
 import argparse
 import numpy as np
 import networkx as nx
 import node2vec
 from gensim.models import Word2Vec, KeyedVectors
+import matplotlib.pyplot as plt
 
 
 def parse_args():
@@ -118,6 +125,32 @@ def learn_embeddings(walks):
 	
 	return model
 
+def visualise_input_network(graph, m):
+    """To visualise the input network
+
+    Args:
+        graph (Networkx graph): The graph to plot
+        m (integer): Number of vertices in the graph
+    """
+	# positions for all nodes
+    pos=nx.spring_layout(graph)
+	# Set the parameters for displaying network
+    nx.draw_networkx(graph,pos, label=None,node_size=400 ,node_color='#4b8bc8',font_size=8, font_color='k', font_family='sans-serif', font_weight='normal', alpha=1, bbox=None, ax=None)
+	# Draw the edges
+    nx.draw_networkx_edges(graph,pos)
+	# Draw the nodes
+    nx.draw_networkx_nodes(graph,pos, nodelist=list(range(m,len(graph))), node_color='r', node_size=400, alpha=1)
+
+	# Print degrees
+    print("Node   Degree")
+    for v in sorted(list(graph.nodes)):
+       print(f"{v:4} {graph.degree(v):6}")
+
+    # nx.draw_circular(graph, with_labels = True)
+
+	# Display the drawing
+    plt.show()
+
 def visualise_embeddings(model):
 	# Retrieve node embeddings and corresponding subjects
 	node_ids = model.wv.index2word  # list of node IDs
@@ -133,8 +166,13 @@ def main(args):
 	"""
 	# Convert network data to a graph
 	nx_G = read_graph()
+	# Visualise the input network
+	visualise_input_network(nx_G, len(nx_G))
+	# Call node2vec
 	G = node2vec.Graph(nx_G, args.directed, args.p, args.q)
+	# Compute transition probabilities
 	G.preprocess_transition_probs()
+	# Simulate node2vec walks
 	walks = G.simulate_walks(args.num_walks, args.walk_length)
 	learn_embeddings(walks)
 
