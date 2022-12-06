@@ -183,7 +183,9 @@ def alias_setup(probs):
 		probs (List): List of normalized transition probabilities
 
 	Returns:
-		_type_: _description_
+		[J,q]
+		J (np.array(dtype=int)):  Relation between smaller and larger probabilities
+		q (np.array()) : Probability list after modification by alias algorithm
 	"""
 	K = len(probs)
 	q = np.zeros(K)	
