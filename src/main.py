@@ -48,9 +48,13 @@ def parse_args():
 
 	parser.add_argument('--output', nargs='?', default='emb/karate.emb',
 	                    help='Embeddings path')
+	# parser.add_argument('--output', nargs='?', default='emb/karate1.emb',
+	#                     help='Embeddings path')
 
 	parser.add_argument('--dimensions', type=int, default=128,
 	                    help='Number of dimensions. Default is 128.')
+	# parser.add_argument('--dimensions', type=int, default=10,
+	#                     help='Number of dimensions. Default is 10.')
 
 	parser.add_argument('--walk-length', type=int, default=80,
 	                    help='Length of walk per source. Default is 80.')
@@ -151,27 +155,23 @@ def visualise_input_network(graph, m):
 	# Display the drawing
     plt.show()
 
-def tsne_plot(model):
-	'''
-	Visualizes the trained model using the TSNE function from sklearn.manifold
+def visualise_output_embeddings(model):
+	"""Visualizes the trained model using the TSNE function from sklearn.manifold
+	Outputs a graph that visualized the embeddings present in model
 
-	Input arguments:
-		model: __description__
-	
-	Output:
-	Graph that visualized the embeddings present in model
-
-	No return items
-	'''
+	Args:
+		model (gensim): Trained model ready to be visualized
+	"""
 	labels = []
-	tokens = np.empty(shape=(0,0))
+	tokens_list = []
 
 	for word in list(model.wv.index_to_key):
-		# print(np.array(model.wv[word]))
-		np.append(tokens, np.array(model.wv[word]))
+		tokens_list.append(np.array(model.wv[word]))
 		labels.append(word)
 
-	tsne_model = TSNE(n_components=128, random_state=34) ## This line currently throws perplexity should be less than n-samples error
+	tokens = np.array(tokens_list)
+	# tsne_model = TSNE(n_components=128, random_state=34) ## This line currently throws perplexity should be less than n-samples error
+	tsne_model = TSNE(n_components=2, perplexity=34)
 	new_values = tsne_model.fit_transform(tokens)
 
 	x = []
@@ -208,12 +208,11 @@ def main(args):
     # Simulate node2vec walks
     walks = G.simulate_walks(args.num_walks, args.walk_length)
     model = learn_embeddings(walks)
-    # try:
-    #     visualise_embeddings(model)
-    # except Exception as e:
-    #     print(e)
-    #     print(e.with_traceback())
-
+    try:
+        visualise_output_embeddings(model)
+    except Exception as e:
+        print(e)
+        print(dir(e))
 if __name__ == "__main__":
 	args = parse_args()
 	main(args)
