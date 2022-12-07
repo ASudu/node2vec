@@ -152,29 +152,64 @@ def visualise_input_network(graph, m):
     plt.show()
 
 def visualise_embeddings(model):
-	# Retrieve node embeddings and corresponding subjects
-	node_ids = model.wv.index2word  # list of node IDs
-	node_embeddings = (model.wv.vectors)
-	# numpy.ndarray of size number of nodes times embeddings dimensionality
-	# node_targets = node_subjects[[int(node_id) for node_id in node_ids]]
+    # Retrieve node embeddings and corresponding subjects
+    # node_ids = model.wv.index2word  # list of node IDs
+    # node_embeddings = (model.wv.vectors)
+
+    def tsne_plot(model):
+        "Creates and TSNE model and plots it"
+        labels = []
+        tokens = np.empty(shape=(0,0))
+
+        for word in list(model.wv.index_to_key):
+            print(np.array(model.wv[word]))
+            np.append(tokens, np.array(model.wv[word]))
+            labels.append(word)
+
+        tsne_model = TSNE(perplexity=74,n_components=128, init='pca', n_iter=2500, random_state=23) ## This line currently throws perplexity should be less than n-samples error
+        new_values = tsne_model.fit_transform(tokens)
+
+        x = []
+        y = []
+        for value in new_values:
+            x.append(value[0])
+            y.append(value[1])
+
+        plt.figure(figsize=(16, 16))
+        for i in range(len(x)):
+            plt.scatter(x[i], y[i])
+            plt.annotate(labels[i],
+                         xy=(x[i], y[i]),
+                         xytext=(5, 2),
+                         textcoords='offset points',
+                         ha='right',
+                         va='bottom')
+        plt.show()
+
+    tsne_plot(model)
 
 def main(args):
-	"""Pipeline for representational learning for all nodes in a graph.
+    """Pipeline for representational learning for all nodes in a graph.
 
-	Args:
-		args (parse_args): Arguments for the embeddings as defined in parse_args function
-	"""
-	# Convert network data to a graph
-	nx_G = read_graph()
-	# Visualise the input network
-	visualise_input_network(nx_G, len(nx_G))
-	# Call node2vec
-	G = node2vec.Graph(nx_G, args.directed, args.p, args.q)
-	# Compute transition probabilities
-	G.preprocess_transition_probs()
-	# Simulate node2vec walks
-	walks = G.simulate_walks(args.num_walks, args.walk_length)
-	learn_embeddings(walks)
+    Args:
+        args (parse_args): Arguments for the embeddings as defined in parse_args function
+    """
+    # Convert network data to a graph
+    nx_G = read_graph()
+    # Visualise the input network
+    visualise_input_network(nx_G, len(nx_G))
+    # Call node2vec
+    G = node2vec.Graph(nx_G, args.directed, args.p, args.q)
+    # Compute transition probabilities
+    G.preprocess_transition_probs()
+    # Simulate node2vec walks
+    walks = G.simulate_walks(args.num_walks, args.walk_length)
+    model = learn_embeddings(walks)
+    try:
+        visualise_embeddings(model)
+    except Exception as e:
+        print(e)
+        print(e.with_traceback())
 
 if __name__ == "__main__":
 	args = parse_args()
