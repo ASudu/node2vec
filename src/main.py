@@ -14,7 +14,7 @@ Teaching Assistant:
 Sarthak Gupta (2019B4A70464P)
 """
 
-
+from sklearn.manifold import TSNE
 import argparse
 import numpy as np
 import networkx as nx
@@ -151,42 +151,45 @@ def visualise_input_network(graph, m):
 	# Display the drawing
     plt.show()
 
-def visualise_embeddings(model):
-    # Retrieve node embeddings and corresponding subjects
-    # node_ids = model.wv.index2word  # list of node IDs
-    # node_embeddings = (model.wv.vectors)
+def tsne_plot(model):
+	'''
+	Visualizes the trained model using the TSNE function from sklearn.manifold
 
-    def tsne_plot(model):
-        "Creates and TSNE model and plots it"
-        labels = []
-        tokens = np.empty(shape=(0,0))
+	Input arguments:
+		model: __description__
+	
+	Output:
+	Graph that visualized the embeddings present in model
 
-        for word in list(model.wv.index_to_key):
-            print(np.array(model.wv[word]))
-            np.append(tokens, np.array(model.wv[word]))
-            labels.append(word)
+	No return items
+	'''
+	labels = []
+	tokens = np.empty(shape=(0,0))
 
-        tsne_model = TSNE(perplexity=74,n_components=128, init='pca', n_iter=2500, random_state=23) ## This line currently throws perplexity should be less than n-samples error
-        new_values = tsne_model.fit_transform(tokens)
+	for word in list(model.wv.index_to_key):
+		# print(np.array(model.wv[word]))
+		np.append(tokens, np.array(model.wv[word]))
+		labels.append(word)
 
-        x = []
-        y = []
-        for value in new_values:
-            x.append(value[0])
-            y.append(value[1])
+	tsne_model = TSNE(n_components=128, random_state=34) ## This line currently throws perplexity should be less than n-samples error
+	new_values = tsne_model.fit_transform(tokens)
 
-        plt.figure(figsize=(16, 16))
-        for i in range(len(x)):
-            plt.scatter(x[i], y[i])
-            plt.annotate(labels[i],
-                         xy=(x[i], y[i]),
-                         xytext=(5, 2),
-                         textcoords='offset points',
-                         ha='right',
-                         va='bottom')
-        plt.show()
+	x = []
+	y = []
+	for value in new_values:
+		x.append(value[0])
+		y.append(value[1])
 
-    tsne_plot(model)
+	plt.figure(figsize=(16, 16))
+	for i in range(len(x)):
+		plt.scatter(x[i], y[i])
+		plt.annotate(labels[i],
+						xy=(x[i], y[i]),
+						xytext=(5, 2),
+						textcoords='offset points',
+						ha='right',
+						va='bottom')
+	plt.show()
 
 def main(args):
     """Pipeline for representational learning for all nodes in a graph.
@@ -205,11 +208,11 @@ def main(args):
     # Simulate node2vec walks
     walks = G.simulate_walks(args.num_walks, args.walk_length)
     model = learn_embeddings(walks)
-    try:
-        visualise_embeddings(model)
-    except Exception as e:
-        print(e)
-        print(e.with_traceback())
+    # try:
+    #     visualise_embeddings(model)
+    # except Exception as e:
+    #     print(e)
+    #     print(e.with_traceback())
 
 if __name__ == "__main__":
 	args = parse_args()
