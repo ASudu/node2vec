@@ -23,8 +23,11 @@ We run on two datasets:
 To run *node2vec* on Zachary's [karate club](http://konect.cc/networks/ucidata-zachary/) network, execute the following command from the project home directory:<br/>
 	``python src/karate_club.py --input graph/karate.edgelist --output emb/karate.emd``
 
-To run *node2vec* on Victor Hugo's novel ['Les Misérables'](http://konect.cc/networks/moreno_lesmis/) network, execute the following command from the project home directory:<br/>
+To run *node2vec* on Victor Hugo's novel ['Les Misérables'](http://konect.cc/networks/moreno_lesmis/) network (without edge weights), execute the following command from the project home directory:<br/>
 	``python src/les_miserables.py --input moreno_lesmis/out.moreno_lesmis_lesmis --output moreno_lesmis/lesmis.emb``
+
+To run *node2vec* on Victor Hugo's novel ['Les Misérables'](http://konect.cc/networks/moreno_lesmis/) network (with edge weights), execute the following command from the project home directory:<br/>
+	``python src/les_miserables.py --input moreno_lesmis/out1.moreno_lesmis_lesmis --output moreno_lesmis/lesmis1.emb --weighted``
 
 #### Options
 You can check out the other options available to use with *node2vec* using:<br/>
