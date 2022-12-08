@@ -1,6 +1,6 @@
 # node2vec
 
-This repository provides builds further on the reference implementation of *node2vec* as described in the [paper](https://arxiv.org/abs/1607.00653):<br>
+This repository builds further on the reference implementation of *node2vec* as described in the [paper](https://arxiv.org/abs/1607.00653):<br>
 > node2vec: Scalable Feature Learning for Networks.<br>
 > Aditya Grover and Jure Leskovec.<br>
 > Knowledge Discovery and Data Mining, 2016.<br>
