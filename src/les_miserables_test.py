@@ -50,8 +50,8 @@ def parse_args():
     parser.add_argument('--output', nargs='?', default='moreno_lesmis/lesmis.emb',
                         help='Embeddings path')
 
-    parser.add_argument('--dimensions', type=int, default=128,
-                        help='Number of dimensions. Default is 128.')
+    parser.add_argument('--dimensions', type=int, default=16,
+                        help='Number of dimensions. Default is 16.')
 
     parser.add_argument('--walk-length', type=int, default=80,
                         help='Length of walk per source. Default is 80.')
@@ -76,8 +76,10 @@ def parse_args():
 
     parser.add_argument('--weighted', dest='weighted', action='store_true',
                         help='Boolean specifying (un)weighted. Default is unweighted.')
+
     parser.add_argument('--unweighted', dest='unweighted', action='store_false')
-    parser.set_defaults(weighted=True)
+
+    parser.set_defaults(weighted=False)
 
     parser.add_argument('--directed', dest='directed', action='store_true',
                         help='c.')
@@ -124,9 +126,9 @@ def learn_embeddings(walks):
     # Instantiate the word2vec model
     model = Word2Vec(sentences=walks, vector_size=args.dimensions, window=args.window_size, min_count=0, sg=1,
                      workers=args.workers, epochs=args.iter)
-    # Load the KeyedVectors of trained model
-    KeyedVectors.load_word2vec_format(args.output)
-
+    
+    model.wv.save_word2vec_format(args.output)
+    
     return model
 
 
@@ -157,47 +159,41 @@ def visualise_input_network(graph, m):
     # Display the drawing
     plt.show()
 
+def visualise_output_embeddings(model):
+	"""Visualizes the trained model using the TSNE function from sklearn.manifold
+	Outputs a graph that visualized the embeddings present in model
 
-def visualise_embeddings(model):
-    # Retrieve node embeddings and corresponding subjects
-    # node_ids = model.wv.index2word  # list of node IDs
-    # node_embeddings = (model.wv.vectors)
+	Args:
+		model (gensim): Trained model ready to be visualized
+	"""
+	labels = []
+	tokens_list = []
 
-    def tsne_plot(model):
-        "Creates and TSNE model and plots it"
-        labels = []
-        tokens = np.empty(shape=(0,0))
+	for word in list(model.wv.index_to_key):
+		tokens_list.append(np.array(model.wv[word]))
+		labels.append(word)
 
-        for word in list(model.wv.index_to_key):
-            print(np.array(model.wv[word]))
-            np.append(tokens, np.array(model.wv[word]))
-            labels.append(word)
+	tokens = np.array(tokens_list)
+	# tsne_model = TSNE(n_components=128, random_state=34) ## This line currently throws perplexity should be less than n-samples error
+	tsne_model = TSNE(n_components=2)
+	new_values = tsne_model.fit_transform(tokens)
 
-        tsne_model = TSNE(perplexity=74,n_components=128, init='pca', n_iter=2500, random_state=23)
-        new_values = tsne_model.fit_transform(tokens)
+	x = []
+	y = []
+	for value in new_values:
+		x.append(value[0])
+		y.append(value[1])
 
-        x = []
-        y = []
-        for value in new_values:
-            x.append(value[0])
-            y.append(value[1])
-
-        plt.figure(figsize=(16, 16))
-        for i in range(len(x)):
-            plt.scatter(x[i], y[i])
-            plt.annotate(labels[i],
-                         xy=(x[i], y[i]),
-                         xytext=(5, 2),
-                         textcoords='offset points',
-                         ha='right',
-                         va='bottom')
-        plt.show()
-
-    tsne_plot(model)
-
-
-# numpy.ndarray of size number of nodes times embeddings dimensionality
-# node_targets = node_subjects[[int(node_id) for node_id in node_ids]]
+	plt.figure(figsize=(16, 16))
+	for i in range(len(x)):
+		plt.scatter(x[i], y[i])
+		plt.annotate(labels[i],
+						xy=(x[i], y[i]),
+						xytext=(5, 2),
+						textcoords='offset points',
+						ha='right',
+						va='bottom')
+	plt.show()
 
 def main(args):
     """Pipeline for representational learning for all nodes in a graph.
@@ -217,7 +213,7 @@ def main(args):
     walks = G.simulate_walks(args.num_walks, args.walk_length)
     model = learn_embeddings(walks)
     try:
-        visualise_embeddings(model)
+        visualise_output_embeddings(model)
     except Exception as e:
         print(e)
         print(e.with_traceback())

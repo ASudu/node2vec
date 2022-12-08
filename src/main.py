@@ -124,8 +124,8 @@ def learn_embeddings(walks):
 	walks = [list(map(str, walk)) for walk in walks]
 	# Instantiate the word2vec model
 	model = Word2Vec(sentences=walks, vector_size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers, epochs=args.iter)
-	# Load the KeyedVectors of trained model
-	KeyedVectors.load_word2vec_format(args.output)
+	
+	model.wv.save_word2vec_format(args.output)
 	
 	return model
 
@@ -154,48 +154,6 @@ def visualise_input_network(graph, m):
 
 	# Display the drawing
     plt.show()
-
-def tsne_plot(model):
-	'''
-	Visualizes the trained model using the TSNE function from sklearn.manifold
-
-	Input arguments:
-		model: __description__
-	
-	Output:
-	Graph that visualized the embeddings present in model
-
-	No return items
-	'''
-	labels = []
-	tokens = np.empty(shape=(0,0))
-
-	for word in list(model.wv.index_to_key):
-		# print(np.array(model.wv[word]))
-		tokens = np.append(tokens, np.array(model.wv[word]))
-		labels.append(word)
-
-	tsne_model = TSNE(n_components=2, init='pca', n_iter=2500, random_state=2)
-	tokens = np.reshape(tokens, (34,128))
-	new_values = tsne_model.fit_transform(tokens)
-
-	x = []
-	y = []
-	for value in new_values:
-		x.append(value[0])
-		y.append(value[1])
-
-	plt.figure(figsize=(16, 16))
-	for i in range(len(x)):
-		plt.scatter(x[i], y[i])
-		plt.annotate(labels[i],
-						xy=(x[i], y[i]),
-						xytext=(5, 2),
-						textcoords='offset points',
-						ha='right',
-						va='bottom')
-	plt.show()
-
 
 def visualise_output_embeddings(model):
 	"""Visualizes the trained model using the TSNE function from sklearn.manifold
