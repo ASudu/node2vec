@@ -213,7 +213,7 @@ def visualise_output_embeddings(model):
 
 	tokens = np.array(tokens_list)
 	# tsne_model = TSNE(n_components=128, random_state=34) ## This line currently throws perplexity should be less than n-samples error
-	tsne_model = TSNE(n_components=2, perplexity=34)
+	tsne_model = TSNE(n_components=2)
 	new_values = tsne_model.fit_transform(tokens)
 
 	x = []
