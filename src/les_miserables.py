@@ -43,15 +43,15 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(description="Run node2vec.")
 
-    # parser.add_argument('--input', nargs='?', default='moreno_lesmis/out.moreno_lesmis_lesmis',
-    #                     help='Input graph path')
-    parser.add_argument('--input', nargs='?', default='moreno_lesmis/out1.moreno_lesmis_lesmis',
+    parser.add_argument('--input', nargs='?', default='moreno_lesmis/out.moreno_lesmis_lesmis',
                         help='Input graph path')
+    # parser.add_argument('--input', nargs='?', default='moreno_lesmis/out1.moreno_lesmis_lesmis',
+    #                     help='Input graph path')
 
-    # parser.add_argument('--output', nargs='?', default='moreno_lesmis/lesmis.emb',
-    #                     help='Embeddings path')
-    parser.add_argument('--output', nargs='?', default='moreno_lesmis/lesmis1.emb',
+    parser.add_argument('--output', nargs='?', default='moreno_lesmis/lesmis.emb',
                         help='Embeddings path')
+    # parser.add_argument('--output', nargs='?', default='moreno_lesmis/lesmis1.emb',
+    #                     help='Embeddings path')
 
     parser.add_argument('--dimensions', type=int, default=16,
                         help='Number of dimensions. Default is 16.')
