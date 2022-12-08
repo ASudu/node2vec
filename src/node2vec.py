@@ -178,7 +178,7 @@ class Graph():
 
 def alias_setup(probs):
 	"""Compute utility lists for non-uniform sampling from discrete distributions.
-	Refer to https://hips.seas.harvard.edu/blog/2013/03/03/the-alias-method-efficient-sampling-with-many-discrete-outcomes/
+	Refer to https://lips.cs.princeton.edu/the-alias-method-efficient-sampling-with-many-discrete-outcomes/
 	for details
 
 	Args:
