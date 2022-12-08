@@ -18,9 +18,8 @@ import argparse
 import numpy as np
 import networkx as nx
 from sklearn.manifold import TSNE
-
 import node2vec
-from gensim.models import Word2Vec, KeyedVectors
+from gensim.models import Word2Vec
 import matplotlib.pyplot as plt
 
 
@@ -139,61 +138,71 @@ def visualise_input_network(graph, m):
         graph (Networkx graph): The graph to plot
         m (integer): Number of vertices in the graph
     """
-    # positions for all nodes
-    pos = nx.spring_layout(graph)
-    # Set the parameters for displaying network
-    nx.draw_networkx(graph, pos, label=None, node_size=400, node_color='#4b8bc8', font_size=8, font_color='k',
-                     font_family='sans-serif', font_weight='normal', alpha=1, bbox=None, ax=None)
-    # Draw the edges
-    nx.draw_networkx_edges(graph, pos)
-    # Draw the nodes
-    nx.draw_networkx_nodes(graph, pos, nodelist=list(range(m, len(graph))), node_color='r', node_size=400, alpha=1)
+    # # positions for all nodes
+    # pos = nx.spring_layout(graph)
+    # # Set the parameters for displaying network
+    # nx.draw_networkx(graph, pos, label=None, node_size=400, node_color='#4b8bc8', font_size=8, font_color='k',
+    #                  font_family='sans-serif', font_weight='normal', alpha=1, bbox=None, ax=None)
+    # # Draw the edges
+    # nx.draw_networkx_edges(graph, pos)
+    # # Draw the nodes
+    # nx.draw_networkx_nodes(graph, pos, nodelist=list(range(m, len(graph))), node_color='r', node_size=400, alpha=1)
 
     #Print degrees
     print("Node   Degree")
     for v in sorted(list(graph.nodes)):
         print(f"{v:4} {graph.degree(v):6}")
 
-    # nx.draw_circular(graph, with_labels = True)
+    nx.draw_circular(graph, with_labels=True)
 
     # Display the drawing
     plt.show()
 
 def visualise_output_embeddings(model):
-	"""Visualizes the trained model using the TSNE function from sklearn.manifold
-	Outputs a graph that visualized the embeddings present in model
 
-	Args:
-		model (gensim): Trained model ready to be visualized
-	"""
-	labels = []
-	tokens_list = []
+    """Visualizes the trained model using the TSNE function
+    For more info: 
+    Outputs a graph that visualized the embeddings present in model
 
-	for word in list(model.wv.index_to_key):
-		tokens_list.append(np.array(model.wv[word]))
-		labels.append(word)
+    Args:
+        model (gensim): Trained model ready to be visualized
+    """
+    # Initializations
+    labels = []
+    tokens_list = []
 
-	tokens = np.array(tokens_list)
-	# tsne_model = TSNE(n_components=128, random_state=34) ## This line currently throws perplexity should be less than n-samples error
-	tsne_model = TSNE(n_components=2)
-	new_values = tsne_model.fit_transform(tokens)
+    # Tokens are the vectors (coordinates) of the trained model
+    for word in list(model.wv.index_to_key):
+        # Word is the node label and model.wv[word] is the coordinates of the node
+        # in the final embedding
+        tokens_list.append(np.array(model.wv[word]))
+        # Collecting the node labels
+        labels.append(word)
 
-	x = []
-	y = []
-	for value in new_values:
-		x.append(value[0])
-		y.append(value[1])
+    tokens = np.array(tokens_list)
+    tsne_model = TSNE(n_components=2)
+    new_values = tsne_model.fit_transform(tokens)
 
-	plt.figure(figsize=(16, 16))
-	for i in range(len(x)):
-		plt.scatter(x[i], y[i])
-		plt.annotate(labels[i],
-						xy=(x[i], y[i]),
-						xytext=(5, 2),
-						textcoords='offset points',
-						ha='right',
-						va='bottom')
-	plt.show()
+    # Split data into x and y for plotting
+    x = []
+    y = []
+    for value in new_values:
+        x.append(value[0])
+        y.append(value[1])
+
+    # Setting up for plotting
+    plt.figure(figsize=(16, 16))
+    for i in range(len(x)):
+        plt.scatter(x[i], y[i])
+        plt.annotate(labels[i],
+                        xy=(x[i], y[i]),
+                        xytext=(5, 2),
+                        textcoords='offset points',
+                        ha='right',
+                        va='bottom')
+    
+    # Display the plot
+    plt.show()
 
 def main(args):
     """Pipeline for representational learning for all nodes in a graph.
