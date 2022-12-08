@@ -13,7 +13,7 @@ Manpreet Singh Ahluwalia (2020A3PS0419P)
 Teaching Assistant:
 Sarthak Gupta (2019B4A70464P)
 """
-
+from sklearn.cluster import KMeans
 import argparse
 import numpy as np
 import networkx as nx
@@ -199,11 +199,31 @@ def visualise_output_embeddings(model):
     for value in new_values:
         x.append(value[0])
         y.append(value[1])
+    
+    # K-means clustering
+    data = list(zip(x, y))
+    inertias = []
+    colors = ['r','g','b','k','m']
+
+    # Elbow method to determine number of clusters
+    for i in range(len(new_values)):
+        kmeans = KMeans(n_clusters=i+1)
+        kmeans.fit(data)
+        inertias.append(kmeans.inertia_)
+
+    plt.plot(range(1,len(new_values)+1), inertias, marker='o')
+    plt.title('Elbow method')
+    plt.xlabel('Number of clusters')
+    plt.ylabel('Inertia')
+    plt.show()
+
+    kmeans = KMeans(n_clusters=5)
+    kmeans.fit(data)
 
     # Setting up for plotting
     plt.figure(figsize=(16, 16))
     for i in range(len(x)):
-        plt.scatter(x[i], y[i])
+        plt.scatter(x[i], y[i],c=colors[kmeans.labels_[i]])
         plt.annotate(labels[i],
                         xy=(x[i], y[i]),
                         xytext=(5, 2),
