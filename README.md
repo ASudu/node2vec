@@ -1,18 +1,30 @@
 # node2vec
 
-This repository provides a reference implementation of *node2vec* as described in the paper:<br>
+This repository provides builds further on the reference implementation of *node2vec* as described in the [paper](https://arxiv.org/abs/1607.00653):<br>
 > node2vec: Scalable Feature Learning for Networks.<br>
 > Aditya Grover and Jure Leskovec.<br>
 > Knowledge Discovery and Data Mining, 2016.<br>
 > <Insert paper link>
+
+# Authors
+
+| Name | Github ID |
+| --- | ----------- |
+| A Sudarshan |[ASudu](https://github.com/ASudu) |
+| Rahul Balike | [RahulBalike](https://github.com/RahulBalike)|
+| Manpreet Singh Ahluwalia | [Manpreet-2002](https://github.com/Manpreet-2002)|
 
 The *node2vec* algorithm learns continuous representations for nodes in any (un)directed, (un)weighted graph. Please check the [project page](https://snap.stanford.edu/node2vec/) for more details. 
 
 ### Basic Usage
 
 #### Example
-To run *node2vec* on Zachary's karate club network, execute the following command from the project home directory:<br/>
-	``python src/main.py --input graph/karate.edgelist --output emb/karate.emd``
+We run on two datasets:
+To run *node2vec* on Zachary's [karate club](http://konect.cc/networks/ucidata-zachary/) network, execute the following command from the project home directory:<br/>
+	``python src/karate_club.py --input graph/karate.edgelist --output emb/karate.emd``
+
+To run *node2vec* on Victor Hugo's novel ['Les Misérables'](http://konect.cc/networks/moreno_lesmis/) network, execute the following command from the project home directory:<br/>
+	``python src/les_miserables.py --input moreno_lesmis/out.moreno_lesmis_lesmis --output moreno_lesmis/lesmis.emb``
 
 #### Options
 You can check out the other options available to use with *node2vec* using:<br/>
@@ -37,19 +49,5 @@ The next *n* lines are as follows:
 
 where dim1, ... , dimd is the *d*-dimensional representation learned by *node2vec*.
 
-### Citing
-If you find *node2vec* useful for your research, please consider citing the following paper:
-
-	@inproceedings{node2vec-kdd2016,
-	author = {Grover, Aditya and Leskovec, Jure},
-	 title = {node2vec: Scalable Feature Learning for Networks},
-	 booktitle = {Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},
-	 year = {2016}
-	}
-
-
-### Miscellaneous
-
-Please send any questions you might have about the code and/or the algorithm to <adityag@cs.stanford.edu>.
-
-*Note:* This is only a reference implementation of the *node2vec* algorithm and could benefit from several performance enhancement schemes, some of which are discussed in the paper.
+#### Visulaizations
+For each network, we first display the input network and then output the final embeddings given by *node2vec* after applying *tSNE*.
