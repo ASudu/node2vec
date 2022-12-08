@@ -136,21 +136,21 @@ def visualise_input_network(graph, m):
         graph (Networkx graph): The graph to plot
         m (integer): Number of vertices in the graph
     """
-	# positions for all nodes
-    pos=nx.spring_layout(graph)
-	# Set the parameters for displaying network
-    nx.draw_networkx(graph,pos, label=None,node_size=400 ,node_color='#4b8bc8',font_size=8, font_color='k', font_family='sans-serif', font_weight='normal', alpha=1, bbox=None, ax=None)
-	# Draw the edges
-    nx.draw_networkx_edges(graph,pos)
-	# Draw the nodes
-    nx.draw_networkx_nodes(graph,pos, nodelist=list(range(m,len(graph))), node_color='r', node_size=400, alpha=1)
+	# # positions for all nodes
+    # pos=nx.spring_layout(graph)
+	# # Set the parameters for displaying network
+    # nx.draw_networkx(graph,pos, label=None,node_size=400 ,node_color='#4b8bc8',font_size=8, font_color='k', font_family='sans-serif', font_weight='normal', alpha=1, bbox=None, ax=None)
+	# # Draw the edges
+    # nx.draw_networkx_edges(graph,pos)
+	# # Draw the nodes
+    # nx.draw_networkx_nodes(graph,pos, nodelist=list(range(m,len(graph))), node_color='r', node_size=400, alpha=1)
 
 	# Print degrees
     print("Node   Degree")
     for v in sorted(list(graph.nodes)):
        print(f"{v:4} {graph.degree(v):6}")
 
-    # nx.draw_circular(graph, with_labels = True)
+    nx.draw_circular(graph, with_labels = True)
 
 	# Display the drawing
     plt.show()
@@ -162,24 +162,30 @@ def visualise_output_embeddings(model):
 	Args:
 		model (gensim): Trained model ready to be visualized
 	"""
+	# Initializations
 	labels = []
 	tokens_list = []
 
+	# Tokens are the vectors (coordinates) of the trained model
 	for word in list(model.wv.index_to_key):
+		# Word is the node label and model.wv[word] is the coordinates of the node
+        # in the final embedding
 		tokens_list.append(np.array(model.wv[word]))
+		# Collecting the node labels
 		labels.append(word)
 
 	tokens = np.array(tokens_list)
-	# tsne_model = TSNE(n_components=128, random_state=34) ## This line currently throws perplexity should be less than n-samples error
 	tsne_model = TSNE(n_components=2)
 	new_values = tsne_model.fit_transform(tokens)
 
+	# Split data into x and y for plotting
 	x = []
 	y = []
 	for value in new_values:
 		x.append(value[0])
 		y.append(value[1])
 
+	# Setting up for plotting
 	plt.figure(figsize=(16, 16))
 	for i in range(len(x)):
 		plt.scatter(x[i], y[i])
@@ -189,6 +195,7 @@ def visualise_output_embeddings(model):
 						textcoords='offset points',
 						ha='right',
 						va='bottom')
+	# Display the plot
 	plt.show()
 
 def main(args):
