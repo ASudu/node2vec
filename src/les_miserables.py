@@ -82,8 +82,8 @@ def parse_args():
 
     parser.add_argument('--unweighted', dest='unweighted', action='store_false')
 
-    # parser.set_defaults(weighted=False)
-    parser.set_defaults(weighted=True)
+    parser.set_defaults(weighted=False)
+    # parser.set_defaults(weighted=True)
 
     parser.add_argument('--directed', dest='directed', action='store_true',
                         help='c.')
@@ -102,15 +102,20 @@ def read_graph():
     # By default create a directed graph (DiGraph) by reading the edge list
     if args.weighted:  # If graph is weighted
         G = nx.read_edgelist(args.input, nodetype=int, data=(('weight', float),), create_using=nx.DiGraph())
+        print("The input graph is weighted")
     else:  # If graph is unweighted
         G = nx.read_edgelist(args.input, nodetype=int, create_using=nx.DiGraph())
         # Assign edge weights to 1 (since unweighted)
         for edge in G.edges():
             G[edge[0]][edge[1]]['weight'] = 1
+        print("The input graph is unweighted")
 
     # If network is undirected, we convert G to undirected graph
     if not args.directed:
         G = G.to_undirected()
+        print("The input graph is undirected")
+    else:
+        print("The input graph is directed")
 
     return G
 
