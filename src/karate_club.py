@@ -24,7 +24,8 @@ import matplotlib.pyplot as plt
 
 
 def parse_args():
-    """Parses the node2vec arguments:
+    """
+    Parses the node2vec arguments:
     input: Path of file containing data of input graph
     output: Path of file to store learnt embeddings
     dimensions: Dimensions of embedding space (default is 128)
@@ -90,7 +91,8 @@ def parse_args():
     return parser.parse_args()
 
 def read_graph():
-    """Reads the input network in networkx.
+    """
+    Reads the input network in networkx.
 
     Returns:
         G: Networkx graph having information of the input network
@@ -98,20 +100,26 @@ def read_graph():
     # By default create a directed graph (DiGraph) by reading the edge list
     if args.weighted: # If graph is weighted
         G = nx.read_edgelist(args.input, nodetype=int, data=(('weight',float),), create_using=nx.DiGraph())
+        print("The input graph is weighted")
     else: # If graph is unweighted
         G = nx.read_edgelist(args.input, nodetype=int, create_using=nx.DiGraph())
         # Assign edge weights to 1 (since unweighted)
         for edge in G.edges():
             G[edge[0]][edge[1]]['weight'] = 1
+        print("The input graph is unweighted")
 
     # If network is undirected, we convert G to undirected graph
     if not args.directed:
         G = G.to_undirected()
+        print("The input graph is undirected")
+    else:
+        print("The input graph is directed")
 
     return G
 
 def learn_embeddings(walks):
-    """Learn embeddings by optimizing the Skipgram objective using SGD.
+    """
+    Learn embeddings by optimizing the Skipgram objective using SGD.
 
     Args:
         walks (List): List of simulated node2vec walks
@@ -124,13 +132,14 @@ def learn_embeddings(walks):
     walks = [list(map(str, walk)) for walk in walks]
     # Instantiate the word2vec model
     model = Word2Vec(sentences=walks, vector_size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers, epochs=args.iter)
-    
+    # Save the trained model
     model.wv.save_word2vec_format(args.output)
     
     return model
 
 def visualise_input_network(graph, m):
-    """To visualise the input network
+    """
+    To visualise the input network
 
     Args:
         graph (Networkx graph): The graph to plot
@@ -156,7 +165,8 @@ def visualise_input_network(graph, m):
     plt.show()
 
 def visualise_output_embeddings(model):
-    """Visualizes the trained model using the TSNE function from sklearn.manifold
+    """
+    Visualizes the trained model using the TSNE function from sklearn.manifold
     Outputs a graph that visualized the embeddings present in model
 
     Args:
@@ -219,7 +229,8 @@ def visualise_output_embeddings(model):
     plt.show()
 
 def main(args):
-    """Pipeline for representational learning for all nodes in a graph.
+    """
+    Pipeline for representational learning for all nodes in a graph.
 
     Args:
         args (parse_args): Arguments for the embeddings as defined in parse_args function
@@ -240,6 +251,7 @@ def main(args):
     except Exception as e:
         print(e)
         print(dir(e))
+        
 if __name__ == "__main__":
     args = parse_args()
     main(args)

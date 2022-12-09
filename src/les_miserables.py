@@ -24,7 +24,8 @@ import matplotlib.pyplot as plt
 
 
 def parse_args():
-    """Parses the node2vec arguments:
+    """
+    Parses the node2vec arguments:
     input: Path of file containing data of input graph
     output: Path of file to store learnt embeddings
     dimensions: Dimensions of embedding space (default is 128)
@@ -94,7 +95,8 @@ def parse_args():
 
 
 def read_graph():
-    """Reads the input network in networkx.
+    """
+    Reads the input network in networkx.
 
     Returns:
         G: Networkx graph having information of the input network
@@ -121,7 +123,8 @@ def read_graph():
 
 
 def learn_embeddings(walks):
-    """Learn embeddings by optimizing the Skipgram objective using SGD.
+    """
+    Learn embeddings by optimizing the Skipgram objective using SGD.
 
     Args:
         walks (List): List of simulated node2vec walks
@@ -135,14 +138,15 @@ def learn_embeddings(walks):
     # Instantiate the word2vec model
     model = Word2Vec(sentences=walks, vector_size=args.dimensions, window=args.window_size, min_count=0, sg=1,
                      workers=args.workers, epochs=args.iter)
-    
+    # Save the trained model
     model.wv.save_word2vec_format(args.output)
     
     return model
 
 
 def visualise_input_network(graph, m):
-    """To visualise the input network
+    """
+    To visualise the input network
 
     Args:
         graph (Networkx graph): The graph to plot
@@ -169,8 +173,8 @@ def visualise_input_network(graph, m):
     plt.show()
 
 def visualise_output_embeddings(model):
-
-    """Visualizes the trained model using the TSNE function
+    """
+    Visualizes the trained model using the TSNE function
     For more info: 
     Outputs a graph that visualized the embeddings present in model
 
@@ -235,7 +239,8 @@ def visualise_output_embeddings(model):
     plt.show()
 
 def main(args):
-    """Pipeline for representational learning for all nodes in a graph.
+    """
+    Pipeline for representational learning for all nodes in a graph.
 
     Args:
         args (parse_args): Arguments for the embeddings as defined in parse_args function
