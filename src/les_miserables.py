@@ -75,7 +75,7 @@ def parse_args():
     parser.add_argument('--p', type=float, default=1,
                         help='Return hyperparameter. Default is 1.')
 
-    parser.add_argument('--q', type=float, default=1,
+    parser.add_argument('--q', type=float, default=0.5,
                         help='Inout hyperparameter. Default is 1.')
 
     parser.add_argument('--weighted', dest='weighted', action='store_true',
